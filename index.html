@@ -1,33 +1,231 @@
-<!doctype html>
+<!--<!doctype html>
 <html class="no-js" lang="">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <link rel="stylesheet" href="css/style.css">
-  <meta name="description" content="">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="css/style.css">
+<meta name="description" content="">
 
-  <meta property="og:title" content="">
-  <meta property="og:type" content="">
-  <meta property="og:url" content="">
-  <meta property="og:image" content="">
-  <meta property="og:image:alt" content="">
+<meta property="og:title" content="">
+<meta property="og:type" content="">
+<meta property="og:url" content="">
+<meta property="og:image" content="">
+<meta property="og:image:alt" content="">
 
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.png">
 
-  <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#fafafa">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#fafafa">
+</head>
+
+
+
+<head>
+<meta charset="UTF-8">
+<title>Meals från API</title>
+</head>
+<body>
+<h1>Första fem måltiderna</h1>
+<ul id="mealList"></ul>
+
+<script>
+// Hämta data där första bokstaven är "a"
+fetch("https://www.themealdb.com/api/json/v1/1/search.php?f=a")
+  .then(response => response.json())
+  .then(data => {
+    console.log("All data:", data);
+
+    const meals = data.meals
+      .sort((a, b) => a.strMeal.localeCompare(b.strMeal))
+
+      // sortera A–Ö
+      .slice(0, 5);
+
+    // ta de första fem
+    console.log("Första fem (alfabetiskt):");
+    meals.forEach(meal => console.log(meal.strMeal));
+
+    // Visa i webblistan
+    const mealList = document.getElementById("mealList");
+    meals.forEach(meal => {
+      const li = document.createElement("li");
+      li.textContent = meal.strMeal;
+      mealList.appendChild(li);
+    });
+  })
+  .catch(error => console.error("Fel vid hämtning:", error));
+</script>
+</body>
+
+
+
+
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Meals från Open API</title>
 </head>
 
 <body>
+<h1>Första fem måltiderna</h1>
+<ul id="mealList"></ul>
 
-  <!-- Add your site or application content here -->
-  <p>Hello world! This is HTML5 Boilerplate.</p>
+<script>
+// ================================
+// Steg 1: Hämta data från API:t
+// ================================
+fetch("https://www.themealdb.com/api/json/v1/1/search.php?f=a")
+  .then(response => response.json()) // Gör om svaret till JSON
+  .then(data => {
+    // ================================
+    // Steg 2: Visa alla måltider i konsolen
+    // ================================
+    console.log("All data från API:", data);
+
+    // ================================
+    // Steg 3: Sortera alfabetiskt + ta 5 första
+    // ================================
+    const meals = data.meals
+      .sort((a, b) => a.strMeal.localeCompare(b.strMeal))
+      .slice(0, 5);
+
+    console.log("Första fem (alfabetiskt):");
+    meals.forEach(meal => console.log(meal.strMeal));
+
+    // ================================
+    // Steg 4: Visa resultatet i webbsidan
+    // ================================
+    const mealList = document.getElementById("mealList"); // Hämta <ul>-elementet
+
+    meals.forEach(meal => {
+      const li = document.createElement("li"); // Skapa ett nytt list-element
+      li.textContent = meal.strMeal;           // Skriv in meal-namnet
+      mealList.appendChild(li);                // Lägg till i listan
+    });
+  })
+  .catch(error => console.error("Fel vid hämtning:", error));
+</script>
+</body>
+
+
+
+
+<body>
+
+Add your site or application content here
+<p>Hello world! This is HTML5 Boilerplate.</p>
   <script src="js/app.js"></script>
 
 </body>
 
 </html>
+-->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <title>Meals från TheMealDB — exempel</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 16px; }
+    input, button { font-size: 14px; padding: 6px; margin-right: 6px; }
+    li { margin: 6px 0; }
+    .small { color: #555; font-size: 13px; }
+  </style>
+</head>
+<body>
+<h1>Första fem måltiderna (alfabetiskt)</h1>
+
+<!-- Enkel kontroll för vilken/vilka bokstäver vi vill hämta -->
+<label for="letters">Hämta bokstav(er) (separerade med kommatecken):</label>
+<input id="letters" type="text" value="a,b" />
+<button id="loadBtn">Hämta och visa</button>
+<p class="small">Exempel: "a" eller "b" eller "a,b" (utan mellanslag efter komma).</p>
+
+<ul id="mealList"></ul>
+<p id="status" class="small"></p>
+
+<script>
+  // Enkel funktion som hämtar meals för en bokstav (f=<letter>)
+  function fetchMealsByLetter(letter) {
+    const url = "https://www.themealdb.com/api/json/v1/1/search.php?f=" + encodeURIComponent(letter);
+    return fetch(url)
+      .then(resp => {
+        if (!resp.ok) throw new Error("HTTP-fel: " + resp.status);
+        return resp.json();
+      })
+      .then(data => {
+        // data.meals kan vara null om inga träffar
+        return data.meals || []; // returnera tom array om inga meals
+      });
+  }
+
+  // Huvudfunktion: hämtar för flera bokstäver, slår ihop, sorterar och visar de 5 första
+  function loadAndShow(lettersCsv) {
+    const letters = lettersCsv.split(",").map(s => s.trim()).filter(Boolean);
+    const statusEl = document.getElementById("status");
+    const listEl = document.getElementById("mealList");
+    listEl.innerHTML = ""; // rensa listan
+    statusEl.textContent = "Hämtar...";
+
+    // Skapa en array med promises
+    const promises = letters.map(letter => fetchMealsByLetter(letter));
+
+    Promise.all(promises)
+      .then(resultsArray => {
+        // resultsArray är en array av arrays — slå ihop till en enda lista
+        const combined = resultsArray.flat();
+
+        // Ta bort dubbletter (samma strMeal) för säkerhets skull
+        const uniqueByName = [];
+        const seen = new Set();
+        combined.forEach(m => {
+          if (!seen.has(m.strMeal)) {
+            seen.add(m.strMeal);
+            uniqueByName.push(m);
+          }
+        });
+
+        if (uniqueByName.length === 0) {
+          statusEl.textContent = "Inga måltider hittades för bokstaven/bokstäverna: " + letters.join(", ");
+          return;
+        }
+
+        // Sortera alfabetiskt efter strMeal och ta de fem första
+        const sorted = uniqueByName.sort((a, b) => a.strMeal.localeCompare(b.strMeal)).slice(0, 5);
+
+        // Visa i listan
+        sorted.forEach(meal => {
+          const li = document.createElement("li");
+          // Visa namn + liten beskrivning (kategori eller område) om det finns
+          li.innerHTML = "<strong>" + meal.strMeal + "</strong>"
+            + (meal.strCategory ? " — " + meal.strCategory : "")
+            + (meal.strArea ? " (" + meal.strArea + ")" : "");
+          listEl.appendChild(li);
+        });
+
+        statusEl.textContent = `Visar ${sorted.length} av ${uniqueByName.length} unika resultat (från ${letters.join(", ")}).`;
+      })
+      .catch(err => {
+        console.error(err);
+        statusEl.textContent = "Fel vid hämtning: " + err.message;
+      });
+  }
+
+  // Koppla knappen
+  document.getElementById("loadBtn").addEventListener("click", () => {
+    const letters = document.getElementById("letters").value;
+    loadAndShow(letters);
+  });
+
+  // Ladda initialt för value="a,b"
+  loadAndShow(document.getElementById("letters").value);
+</script>
+</body>
+</html>
+
+
